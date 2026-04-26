@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+body { font-family: Tajawal, ui-sans-serif, system-ui; }
+.prose pre { direction:ltr; text-align:left; }
+.code-block { direction:ltr; text-align:left; white-space:pre-wrap; }

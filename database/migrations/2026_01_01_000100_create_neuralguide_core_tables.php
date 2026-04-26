@@ -1,16 +1,95 @@
 <?php
-use Illuminate\Database\Migrations\Migration; use Illuminate\Database\Schema\Blueprint; use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
- public function up(): void {
-  Schema::create('categories', function(Blueprint $table){$table->id();$table->string('name');$table->string('slug')->unique();$table->text('description')->nullable();$table->string('icon')->nullable();$table->timestamps();});
-  Schema::create('architectures', function(Blueprint $table){$table->id();$table->string('name');$table->string('slug')->unique();$table->text('short_description');$table->longText('description');$table->unsignedSmallInteger('year')->nullable();$table->string('paper_title')->nullable();$table->string('paper_url')->nullable();$table->string('arxiv_url')->nullable();$table->enum('difficulty',['beginner','intermediate','advanced','research'])->default('intermediate');$table->string('data_requirement')->nullable();$table->string('compute_requirement')->nullable();$table->text('best_for')->nullable();$table->text('limitations')->nullable();$table->json('frameworks')->nullable();$table->json('tags')->nullable();$table->longText('recommended_settings')->nullable();$table->longText('pytorch_example')->nullable();$table->longText('tensorflow_example')->nullable();$table->boolean('is_published')->default(true);$table->timestamps();});
-  Schema::create('architecture_category', function(Blueprint $table){$table->foreignId('architecture_id')->constrained()->cascadeOnDelete();$table->foreignId('category_id')->constrained()->cascadeOnDelete();$table->primary(['architecture_id','category_id']);$table->timestamps();});
-  Schema::create('suggestions', function(Blueprint $table){$table->id();$table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();$table->longText('problem_text');$table->string('detected_domain')->nullable();$table->string('input_language',10)->default('ar');$table->json('metadata')->nullable();$table->timestamps();});
-  Schema::create('architecture_suggestion', function(Blueprint $table){$table->foreignId('architecture_id')->constrained()->cascadeOnDelete();$table->foreignId('suggestion_id')->constrained()->cascadeOnDelete();$table->unsignedInteger('score')->default(0);$table->unsignedTinyInteger('rank')->default(1);$table->text('reason')->nullable();$table->primary(['architecture_id','suggestion_id']);$table->timestamps();});
-  Schema::create('favorites', function(Blueprint $table){$table->foreignId('user_id')->constrained()->cascadeOnDelete();$table->foreignId('architecture_id')->constrained()->cascadeOnDelete();$table->primary(['user_id','architecture_id']);$table->timestamps();});
-  Schema::create('search_logs', function(Blueprint $table){$table->id();$table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();$table->longText('query');$table->string('ip_address',45)->nullable();$table->text('user_agent')->nullable();$table->unsignedInteger('results_count')->default(0);$table->json('metadata')->nullable();$table->timestamps();});
-  Schema::create('research_notes', function(Blueprint $table){$table->id();$table->foreignId('user_id')->constrained()->cascadeOnDelete();$table->foreignId('architecture_id')->nullable()->constrained()->nullOnDelete();$table->string('title');$table->longText('body');$table->enum('visibility',['private','public'])->default('private');$table->timestamps();});
-  Schema::create('comments', function(Blueprint $table){$table->id();$table->foreignId('user_id')->constrained()->cascadeOnDelete();$table->foreignId('architecture_id')->constrained()->cascadeOnDelete();$table->unsignedTinyInteger('rating')->default(5);$table->text('body')->nullable();$table->boolean('is_approved')->default(false);$table->timestamps();});
- }
- public function down(): void { foreach(['comments','research_notes','search_logs','favorites','architecture_suggestion','suggestions','architecture_category','architectures','categories'] as $t){ Schema::dropIfExists($t);} }
+    public function up(): void
+    {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
+            $table->string('icon')->nullable();
+            $table->timestamps(); });
+        Schema::create('architectures', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('short_description');
+            $table->longText('description');
+            $table->unsignedSmallInteger('year')->nullable();
+            $table->string('paper_title')->nullable();
+            $table->string('paper_url')->nullable();
+            $table->string('arxiv_url')->nullable();
+            $table->enum('difficulty', ['beginner', 'intermediate', 'advanced', 'research'])->default('intermediate');
+            $table->string('data_requirement')->nullable();
+            $table->string('compute_requirement')->nullable();
+            $table->text('best_for')->nullable();
+            $table->text('limitations')->nullable();
+            $table->json('frameworks')->nullable();
+            $table->json('tags')->nullable();
+            $table->longText('recommended_settings')->nullable();
+            $table->longText('pytorch_example')->nullable();
+            $table->longText('tensorflow_example')->nullable();
+            $table->boolean('is_published')->default(true);
+            $table->timestamps(); });
+        Schema::create('architecture_category', function (Blueprint $table) {
+            $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->primary(['architecture_id', 'category_id']);
+            $table->timestamps(); });
+        Schema::create('suggestions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->longText('problem_text');
+            $table->string('detected_domain')->nullable();
+            $table->string('input_language', 10)->default('ar');
+            $table->json('metadata')->nullable();
+            $table->timestamps(); });
+        Schema::create('architecture_suggestion', function (Blueprint $table) {
+            $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('suggestion_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('score')->default(0);
+            $table->unsignedTinyInteger('rank')->default(1);
+            $table->text('reason')->nullable();
+            $table->primary(['architecture_id', 'suggestion_id']);
+            $table->timestamps(); });
+        Schema::create('favorites', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
+            $table->primary(['user_id', 'architecture_id']);
+            $table->timestamps(); });
+        Schema::create('search_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->longText('query');
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->unsignedInteger('results_count')->default(0);
+            $table->json('metadata')->nullable();
+            $table->timestamps(); });
+        Schema::create('research_notes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('architecture_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('title');
+            $table->longText('body');
+            $table->enum('visibility', ['private', 'public'])->default('private');
+            $table->timestamps(); });
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
+            $table->unsignedTinyInteger('rating')->default(5);
+            $table->text('body')->nullable();
+            $table->boolean('is_approved')->default(false);
+            $table->timestamps(); });
+    }
+    public function down(): void
+    {
+        foreach (['comments', 'research_notes', 'search_logs', 'favorites', 'architecture_suggestion', 'suggestions', 'architecture_category', 'architectures', 'categories'] as $t) {
+            Schema::dropIfExists($t);
+        }
+    }
 };

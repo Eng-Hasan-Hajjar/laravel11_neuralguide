@@ -7,6 +7,23 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SuggestionController;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Http\Request;
+
+
+
+Route::get('/locale/{locale}', function (Request $request, string $locale) {
+    abort_unless(in_array($locale, ['ar', 'en']), 404);
+
+    Session::put('locale', $locale);
+
+    return redirect()->back()
+        ->withCookie(cookie('locale', $locale, 60 * 24 * 365));
+})->name('locale.switch');
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/architectures', [ArchitectureController::class, 'index'])->name('architectures.index');
 Route::get('/architectures/{architecture:slug}', [ArchitectureController::class, 'show'])->name('architectures.show');

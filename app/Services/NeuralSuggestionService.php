@@ -3,108 +3,101 @@
 namespace App\Services;
 
 use App\Models\Architecture;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class NeuralSuggestionService
 {
-    private array $rules = [
-        'vision' => ['صورة','صور','تصنيف','كشف','تقسيم','وجوه','طبي','اشعة','object','image','segmentation','detection','cnn','vision'],
-        'nlp' => ['نص','لغة','ترجمة','تلخيص','شعر','محادثة','سؤال','إجابة','sentiment','text','nlp','language','transformer','bert','gpt'],
-        'time_series' => ['زمنية','أسهم','تنبؤ','سعر','مبيعات','طقس','sensor','forecast','time series','lstm','gru'],
-        'tabular' => ['احتيال','معاملات','جدول','ائتمان','تصنيف عملاء','churn','fraud','tabular','bank'],
-        'generative' => ['توليد','إبداع','صور جديدة','فيديو','صوت','diffusion','gan','generate','vae'],
-        'graph' => ['رسم بياني','علاقات','شبكات اجتماعية','جزيئات','knowledge graph','graph','node','edge'],
-        'reinforcement' => ['روبوت','لعبة','قرار','تحكم','مسار','agent','reinforcement','policy','reward'],
-        'recommendation' => ['توصية','اقتراح','منتجات','أفلام','مستخدمين','recommendation','ranking'],
-        'audio' => ['صوت','كلام','تعرف على الكلام','موسيقى','audio','speech','wav'],
-    ];
-
-    public function suggest(string $text, int $limit = 5): array
+    public function suggest(string $problem): array
     {
-        $domain = $this->detectDomain($text);
-        $tokens = $this->tokens($text);
+        $text = mb_strtolower($problem);
 
-        $architectures = Architecture::query()
-            ->where('is_published', true)
-            ->with('categories')
-            ->get();
+        $rules = [
+            'vision' => [
+                'keywords' => ['صورة', 'صور', 'تصنيف صور', 'رؤية', 'أشعة', 'طبي', 'image', 'vision', 'classification'],
+                'architectures' => ['CNN', 'ResNet', 'EfficientNet', 'Vision Transformer', 'U-Net', 'YOLO'],
+                'reason' => 'المشكلة تحتوي على مؤشرات مرتبطة بالرؤية الحاسوبية ومعالجة الصور.',
+            ],
 
-        $ranked = $architectures->map(function (Architecture $architecture) use ($domain, $tokens) {
-            $score = 0;
-            $haystack = Str::lower(implode(' ', [
-                $architecture->name,
-                $architecture->short_description,
-                $architecture->description,
-                $architecture->best_for,
-                implode(' ', $architecture->tags ?? []),
-                $architecture->categories->pluck('slug')->join(' '),
-                $architecture->categories->pluck('name')->join(' '),
-            ]));
+            'nlp' => [
+                'keywords' => ['نص', 'نصوص', 'لغة', 'ترجمة', 'شعر', 'تلخيص', 'محادثة', 'chat', 'text', 'nlp'],
+                'architectures' => ['Transformer', 'LSTM', 'BERT'],
+                'reason' => 'المشكلة مرتبطة بمعالجة اللغة الطبيعية أو توليد النصوص.',
+            ],
 
-            foreach ($tokens as $token) {
-                if (Str::contains($haystack, Str::lower($token))) {
-                    $score += mb_strlen($token) > 4 ? 8 : 4;
-                }
-            }
+            'time_series' => [
+                'keywords' => ['أسهم', 'سعر', 'أسعار', 'تنبؤ', 'زمنية', 'عملات', 'مبيعات', 'forecast', 'time series'],
+                'architectures' => ['LSTM', 'Transformer', 'RNN'],
+                'reason' => 'المشكلة تحتوي على بيانات زمنية أو تنبؤ مستقبلي.',
+            ],
 
-            foreach ($architecture->categories as $category) {
-                if ($category->slug === $domain) {
-                    $score += 55;
-                }
-            }
+            'fraud' => [
+                'keywords' => ['احتيال', 'بنك', 'معاملات', 'كشف شذوذ', 'anomaly', 'fraud'],
+                'architectures' => ['AutoEncoder', 'Graph Neural Network', 'Transformer'],
+                'reason' => 'المشكلة مرتبطة باكتشاف الشذوذ أو الاحتيال.',
+            ],
 
-            if (Str::contains($haystack, $domain)) {
-                $score += 20;
-            }
+            'generation' => [
+                'keywords' => ['توليد صور', 'توليد صورة', 'رسم', 'تصميم', 'generate image', 'diffusion'],
+                'architectures' => ['Diffusion Model', 'GAN', 'VAE'],
+                'reason' => 'المشكلة مرتبطة بتوليد الصور أو المحتوى الإبداعي.',
+            ],
 
-            $score += match ($architecture->difficulty) {
-                'beginner' => 4,
-                'intermediate' => 6,
-                'advanced' => 3,
-                default => 1,
-            };
+            'graph' => [
+                'keywords' => ['شبكات اجتماعية', 'علاقات', 'رسم بياني', 'graph', 'nodes', 'edges'],
+                'architectures' => ['Graph Neural Network'],
+                'reason' => 'المشكلة تحتوي على علاقات أو بنية رسوم بيانية.',
+            ],
+        ];
 
-            return [
-                'architecture' => $architecture,
-                'score' => $score,
-                'reason' => $this->buildReason($architecture, $domain, $score),
-            ];
-        })->sortByDesc('score')->take($limit)->values();
-
-        return ['domain' => $domain, 'results' => $ranked];
-    }
-
-    public function detectDomain(string $text): string
-    {
-        $normalized = Str::lower($text);
         $scores = [];
-        foreach ($this->rules as $domain => $keywords) {
-            $scores[$domain] = 0;
-            foreach ($keywords as $keyword) {
-                if (Str::contains($normalized, Str::lower($keyword))) {
-                    $scores[$domain] += mb_strlen($keyword) > 4 ? 2 : 1;
+        $reasons = [];
+        $detectedDomain = 'general';
+
+        foreach ($rules as $domain => $rule) {
+            foreach ($rule['keywords'] as $keyword) {
+                if (str_contains($text, mb_strtolower($keyword))) {
+                    $detectedDomain = $domain;
+
+                    foreach ($rule['architectures'] as $name) {
+                        $scores[$name] = ($scores[$name] ?? 60) + 15;
+                        $reasons[$name] = $rule['reason'];
+                    }
                 }
             }
         }
+
+        if (empty($scores)) {
+            $scores = [
+                'Transformer' => 85,
+                'EfficientNet' => 80,
+                'CNN' => 75,
+                'LSTM' => 70,
+            ];
+
+            foreach ($scores as $name => $score) {
+                $reasons[$name] = 'تم اختيار هذه المعمارية كخيار عام مناسب للعديد من مشكلات التعلم العميق.';
+            }
+        }
+
         arsort($scores);
-        return array_key_first($scores) ?: 'general';
-    }
 
-    private function tokens(string $text): array
-    {
-        $clean = preg_replace('/[^\p{Arabic}a-zA-Z0-9\-\s]/u', ' ', $text);
-        return collect(preg_split('/\s+/u', $clean, -1, PREG_SPLIT_NO_EMPTY))
-            ->filter(fn($t) => mb_strlen($t) >= 3)
-            ->unique()
-            ->take(80)
+        $names = array_slice(array_keys($scores), 0, 5);
+
+        $architectures = Architecture::query()
+            ->whereIn('name', $names)
+            ->get()
+            ->sortBy(fn ($architecture) => array_search($architecture->name, $names))
             ->values()
-            ->all();
-    }
+            ->map(function ($architecture) use ($scores, $reasons) {
+                $architecture->suggestion_score = min($scores[$architecture->name] ?? 80, 100);
+                $architecture->suggestion_reason = $reasons[$architecture->name] ?? 'مناسبة للمشكلة المدخلة.';
 
-    private function buildReason(Architecture $architecture, string $domain, int $score): string
-    {
-        $categoryNames = $architecture->categories->pluck('name')->join('، ');
-        return "تم ترشيح {$architecture->name} لأن خصائصها العلمية تقع ضمن مجال {$categoryNames}، وتناسب نمط المشكلة المكتشف ({$domain}). درجة المطابقة التقريبية: {$score}. راجع القيود ومتطلبات البيانات قبل التنفيذ الإنتاجي.";
+                return $architecture;
+            });
+
+        return [
+            'domain' => $detectedDomain,
+            'analysis' => 'تم تحليل وصف المشكلة وربط الكلمات المفتاحية بأقرب معماريات الشبكات العصبية المناسبة. يعتمد هذا الترشيح على نظام قواعد أولي قابل للتطوير لاحقًا باستخدام نموذج لغوي متقدم.',
+            'architectures' => $architectures,
+        ];
     }
 }

@@ -1,35 +1,56 @@
 <?php
+
 namespace App\Http\Controllers;
-use App\Http\Requests\StoreSuggestionRequest;
-use App\Models\SearchLog;
+
 use App\Models\Suggestion;
 use App\Services\NeuralSuggestionService;
 use Illuminate\Http\Request;
 
-class SuggestionController extends Controller {
-    public function store(StoreSuggestionRequest $request, NeuralSuggestionService $service) {
-        $analysis = $service->suggest($request->validated('problem_text'), 5);
+class SuggestionController extends Controller
+{
+    public function store(Request $request, NeuralSuggestionService $service)
+    {
+        $validated = $request->validate([
+            'problem' => ['required', 'string', 'min:10', 'max:5000'],
+        ]);
+
+        $result = $service->suggest($validated['problem']);
+
         $suggestion = Suggestion::create([
-            'user_id' => $request->user()?->id,
-            'problem_text' => $request->validated('problem_text'),
-            'detected_domain' => $analysis['domain'],
+            'user_id' => auth()->id(),
+            'problem_text' => $validated['problem'],
+            'detected_domain' => $result['domain'] ?? 'general',
             'input_language' => 'ar',
-            'metadata' => ['engine'=>'rule-based-v1'],
+            'metadata' => [
+                'analysis' => $result['analysis'] ?? null,
+                'created_from' => 'home_form',
+            ],
         ]);
-        foreach ($analysis['results'] as $index => $item) {
-            $suggestion->architectures()->attach($item['architecture']->id, [
-                'score'=>$item['score'], 'rank'=>$index+1, 'reason'=>$item['reason']
-            ]);
+
+        $syncData = [];
+
+        foreach ($result['architectures'] as $index => $architecture) {
+            $syncData[$architecture->id] = [
+                'score' => $architecture->suggestion_score ?? 80,
+                'rank' => $index + 1,
+                'reason' => $architecture->suggestion_reason ?? 'تم اختيار هذه المعمارية لأنها مناسبة لنوع المشكلة المدخلة.',
+            ];
         }
-        SearchLog::create([
-            'user_id'=>$request->user()?->id, 'query'=>$request->validated('problem_text'),
-            'ip_address'=>$request->ip(), 'user_agent'=>$request->userAgent(),
-            'results_count'=>$analysis['results']->count(), 'metadata'=>['domain'=>$analysis['domain']]
-        ]);
+
+        $suggestion->architectures()->sync($syncData);
+
         return redirect()->route('suggestions.show', $suggestion);
     }
-    public function show(Suggestion $suggestion) {
-        $suggestion->load('architectures.categories','user');
+
+    public function show(Suggestion $suggestion)
+    {
+        $suggestion->load([
+            'architectures' => function ($query) {
+                $query->orderBy('architecture_suggestion.rank');
+            },
+            'architectures.categories',
+        ]);
+
         return view('suggestions.show', compact('suggestion'));
     }
 }

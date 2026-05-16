@@ -2,6 +2,7 @@
 
 مشروع Laravel 12 عربي/RTL يساعد الباحثين والمبرمجين والطلاب على اختيار أنسب معمارية شبكة عصبية لمشكلتهم، مع تعليل علمي وأمثلة PyTorch/TensorFlow وروابط أوراق بحثية وتقدير حجم البيانات والجهد.
 
+
 ## التشغيل السريع
 ```bash
 composer create-project laravel/laravel NeuralGuide "^12.0"

@@ -5,13 +5,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->string('icon')->nullable();
-            $table->timestamps(); });
+     
         Schema::create('architectures', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -88,7 +82,7 @@ return new class extends Migration {
     }
     public function down(): void
     {
-        foreach (['comments', 'research_notes', 'search_logs', 'favorites', 'architecture_suggestion', 'suggestions', 'architecture_category', 'architectures', 'categories'] as $t) {
+        foreach (['comments', 'research_notes', 'search_logs', 'favorites', 'architecture_suggestion', 'suggestions', 'architecture_category', 'architectures'] as $t) {
             Schema::dropIfExists($t);
         }
     }

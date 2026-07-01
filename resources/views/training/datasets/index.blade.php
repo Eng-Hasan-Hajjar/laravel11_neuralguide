@@ -1,64 +1,61 @@
-{{-- resources/views/training/datasets/index.blade.php --}}
 @extends('layouts.app')
-@section('title', 'مجموعات البيانات')
+@section('title', __('messages.datasets'))
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-8">
+<div class="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div class="mb-8 flex items-center justify-between">
         <div>
-            <a href="{{ route('training.index') }}" class="text-slate-400 hover:text-white text-sm flex items-center gap-2 mb-3">
-                <i class="fa-solid fa-arrow-right"></i> تجارب التدريب
+            <a href="{{ route('training.index') }}" class="mb-3 flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                <i class="fa-solid fa-arrow-right"></i> {{ __('messages.training') }}
             </a>
-            <h1 class="text-3xl font-black">🗄 مجموعات البيانات</h1>
+            <h1 class="text-3xl font-black">🗄 {{ __('messages.datasets') }}</h1>
         </div>
         <a href="{{ route('training.datasets.create') }}"
-           class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-upload"></i> رفع مجموعة
+           class="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-purple-500/25 hover:from-purple-500 hover:to-blue-500 transition-all">
+            <i class="fa-solid fa-upload"></i> {{ __('messages.upload_dataset') }}
         </a>
     </div>
 
     @if($datasets->isEmpty())
-    <div class="text-center py-20 bg-slate-800/30 rounded-3xl border border-dashed border-white/20">
-        <i class="fa-solid fa-database text-5xl text-slate-600 mb-4 block"></i>
-        <p class="text-xl font-bold text-slate-300">لا توجد مجموعات بيانات</p>
-        <p class="text-slate-500 mt-1 mb-6">ارفع مجموعتك الأولى لبدء التدريب</p>
+    <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 py-20 text-center dark:border-white/15 dark:bg-white/[.02]">
+        <i class="fa-solid fa-database mb-4 block text-5xl text-slate-300 dark:text-slate-700"></i>
+        <p class="text-xl font-black text-slate-600 dark:text-slate-300">لا توجد مجموعات بيانات</p>
+        <p class="mt-1 mb-6 text-slate-400 dark:text-slate-500">ارفع مجموعتك الأولى لبدء التدريب</p>
         <a href="{{ route('training.datasets.create') }}"
-           class="bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-xl font-bold transition">
+           class="rounded-2xl bg-purple-600 px-6 py-3 font-black text-white hover:bg-purple-500 transition-colors">
             رفع الآن
         </a>
     </div>
     @else
-    <div class="bg-slate-800/50 border border-white/10 rounded-2xl overflow-hidden">
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5">
         <table class="w-full text-sm">
             <thead>
-                <tr class="bg-white/5 border-b border-white/10 text-slate-400 text-right">
-                    <th class="px-5 py-3 font-medium">الاسم</th>
-                    <th class="px-5 py-3 font-medium">النوع</th>
-                    <th class="px-5 py-3 font-medium">الحجم</th>
-                    <th class="px-5 py-3 font-medium">التاريخ</th>
-                    <th class="px-5 py-3 font-medium">إجراءات</th>
+                <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+                    <th class="px-5 py-3 text-start font-bold">الاسم</th>
+                    <th class="px-5 py-3 text-start font-bold">النوع</th>
+                    <th class="px-5 py-3 text-start font-bold">الحجم</th>
+                    <th class="px-5 py-3 text-start font-bold">التاريخ</th>
+                    <th class="px-5 py-3 text-start font-bold">إجراءات</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100 dark:divide-white/5">
                 @foreach($datasets as $ds)
-                <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td class="px-5 py-3">
-                        <p class="font-medium">{{ $ds->name }}</p>
-                        <p class="text-xs text-slate-500 truncate max-w-xs">{{ $ds->file_name }}</p>
+                        <p class="font-bold text-slate-800 dark:text-slate-200">{{ $ds->name }}</p>
+                        <p class="max-w-xs truncate text-xs text-slate-400">{{ $ds->file_name }}</p>
                     </td>
                     <td class="px-5 py-3">
-                        <span class="text-xs bg-slate-700 px-2 py-1 rounded-full">{{ $ds->type }}</span>
+                        <span class="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600 dark:bg-white/10 dark:text-slate-300">{{ $ds->type }}</span>
                     </td>
-                    <td class="px-5 py-3 text-slate-400">{{ $ds->formattedSize() }}</td>
-                    <td class="px-5 py-3 text-slate-400">{{ $ds->created_at->format('Y-m-d') }}</td>
+                    <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $ds->formattedSize() }}</td>
+                    <td class="px-5 py-3 text-slate-500 dark:text-slate-400">{{ $ds->created_at->format('Y-m-d') }}</td>
                     <td class="px-5 py-3">
                         <div class="flex items-center gap-3">
-                            <a href="{{ route('training.create') }}?dataset_id={{ $ds->id }}"
-                               class="text-cyan-400 hover:text-cyan-300 text-xs">استخدام</a>
-                            <form action="{{ route('training.datasets.destroy', $ds) }}" method="POST"
-                                  onsubmit="return confirm('حذف مجموعة البيانات؟')">
+                            <a href="{{ route('training.create') }}?dataset_id={{ $ds->id }}" class="text-xs font-bold text-cyan-600 hover:underline dark:text-cyan-400">استخدام</a>
+                            <form action="{{ route('training.datasets.destroy', $ds) }}" method="POST" onsubmit="return confirm('حذف مجموعة البيانات؟')">
                                 @csrf @method('DELETE')
-                                <button class="text-red-400 hover:text-red-300 text-xs">حذف</button>
+                                <button class="text-xs font-bold text-red-500 hover:underline">حذف</button>
                             </form>
                         </div>
                     </td>
@@ -67,7 +64,7 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-4">{{ $datasets->links() }}</div>
+    <div class="mt-6">{{ $datasets->links() }}</div>
     @endif
 </div>
 @endsection

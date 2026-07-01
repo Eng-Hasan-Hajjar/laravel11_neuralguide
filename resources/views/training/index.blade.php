@@ -1,73 +1,69 @@
 @extends('layouts.app')
-@section('title', 'تجارب التدريب')
+@section('title', __('messages.training'))
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+
     {{-- Header --}}
-    <div class="flex items-center justify-between mb-8">
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-black">🧪 تجارب التدريب</h1>
-            <p class="text-slate-400 mt-1 text-sm">أنشئ تجربة، اختر معمارية، ولّد كود Python، وحمّله</p>
+            <h1 class="text-3xl font-black">🧪 {{ __('messages.training') }}</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">أنشئ تجربة، اختر معمارية، ولّد كود Python، وحمّله</p>
         </div>
         <a href="{{ route('training.create') }}"
-           class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2">
-            <i class="fa-solid fa-plus"></i> تجربة جديدة
+           class="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-cyan-500/25 hover:from-cyan-500 hover:to-blue-500 transition-all">
+            <i class="fa-solid fa-plus"></i> {{ __('messages.new_experiment') }}
         </a>
     </div>
 
     {{-- Quick Links --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <a href="{{ route('training.create') }}"
-           class="bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-400 rounded-2xl p-4 text-center transition group">
-            <i class="fa-solid fa-plus text-cyan-400 text-xl mb-2 group-hover:scale-110 transition-transform block"></i>
-            <p class="text-sm font-medium">تجربة جديدة</p>
+    <div class="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+        @php
+        $links = [
+            [route('training.create'), 'fa-plus', 'تجربة جديدة', 'cyan'],
+            [route('training.datasets.index'), 'fa-database', __('messages.datasets'), 'purple'],
+            [route('architectures.index'), 'fa-brain', __('messages.architectures'), 'amber'],
+            [route('dashboard'), 'fa-gauge', __('messages.my_dashboard'), 'emerald'],
+        ];
+        @endphp
+        @foreach($links as [$href, $icon, $label, $color])
+        <a href="{{ $href }}"
+           class="group rounded-2xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-{{ $color }}-400 hover:shadow-lg dark:border-white/10 dark:bg-white/5 dark:hover:border-{{ $color }}-500/40">
+            <i class="fa-solid {{ $icon }} mb-2 block text-xl text-{{ $color }}-500 transition-transform group-hover:scale-110"></i>
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ $label }}</p>
         </a>
-        <a href="{{ route('training.datasets.index') }}"
-           class="bg-purple-500/10 border border-purple-500/30 hover:border-purple-400 rounded-2xl p-4 text-center transition group">
-            <i class="fa-solid fa-database text-purple-400 text-xl mb-2 group-hover:scale-110 transition-transform block"></i>
-            <p class="text-sm font-medium">مجموعات البيانات</p>
-        </a>
-        <a href="{{ route('architectures.index') }}"
-           class="bg-amber-500/10 border border-amber-500/30 hover:border-amber-400 rounded-2xl p-4 text-center transition group">
-            <i class="fa-solid fa-brain text-amber-400 text-xl mb-2 group-hover:scale-110 transition-transform block"></i>
-            <p class="text-sm font-medium">استعرض المعماريات</p>
-        </a>
-        <a href="{{ route('dashboard') }}"
-           class="bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-400 rounded-2xl p-4 text-center transition group">
-            <i class="fa-solid fa-gauge text-emerald-400 text-xl mb-2 group-hover:scale-110 transition-transform block"></i>
-            <p class="text-sm font-medium">لوحتي</p>
-        </a>
+        @endforeach
     </div>
 
     {{-- Experiments Grid --}}
     @if($experiments->isEmpty())
-    <div class="text-center py-20 bg-slate-800/30 rounded-3xl border border-dashed border-white/20">
-        <i class="fa-solid fa-flask text-5xl text-slate-600 mb-4 block"></i>
-        <p class="text-xl font-bold text-slate-300">لا توجد تجارب بعد</p>
-        <p class="text-slate-500 mt-1 mb-6">ابدأ بإنشاء تجربتك الأولى</p>
+    <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 py-20 text-center dark:border-white/15 dark:bg-white/[.02]">
+        <i class="fa-solid fa-flask mb-4 block text-5xl text-slate-300 dark:text-slate-700"></i>
+        <p class="text-xl font-black text-slate-600 dark:text-slate-300">لا توجد تجارب بعد</p>
+        <p class="mt-1 mb-6 text-slate-400 dark:text-slate-500">ابدأ بإنشاء تجربتك الأولى</p>
         <a href="{{ route('training.create') }}"
-           class="bg-cyan-600 hover:bg-cyan-500 px-6 py-3 rounded-xl font-bold transition">
+           class="rounded-2xl bg-cyan-600 px-6 py-3 font-black text-white hover:bg-cyan-500 transition-colors">
             ابدأ الآن
         </a>
     </div>
     @else
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         @foreach($experiments as $exp)
-        <div class="bg-slate-800/50 border border-white/10 hover:border-cyan-500/40 rounded-2xl p-5 transition group">
-            <div class="flex items-start justify-between mb-3">
-                <span class="text-xs px-2.5 py-1 rounded-full font-medium
-                    {{ $exp->status==='completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                       ($exp->status==='running'   ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                       ($exp->status==='failed'    ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                                                      'bg-slate-700 text-slate-300')) }}">
-                    {{ $exp->statusLabel() }}
+        <div class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-lg dark:border-white/10 dark:bg-white/5 dark:hover:border-cyan-500/40">
+            <div class="mb-3 flex items-start justify-between">
+                <span class="rounded-full px-2.5 py-1 text-xs font-bold
+                    {{ $exp->status==='completed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                       ($exp->status==='running'   ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' :
+                       ($exp->status==='failed'    ? 'bg-red-500/10 text-red-600 dark:text-red-400' :
+                                                      'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300')) }}">
+                    {{ __('messages.' . $exp->status) }}
                 </span>
-                <span class="text-xs text-slate-500">{{ $exp->created_at->diffForHumans() }}</span>
+                <span class="text-xs text-slate-400">{{ $exp->created_at->diffForHumans() }}</span>
             </div>
 
-            <h3 class="font-bold text-base mb-1 group-hover:text-cyan-400 transition">{{ $exp->name }}</h3>
-            <p class="text-sm text-slate-400 mb-1">{{ $exp->architecture?->name }}</p>
-            <p class="text-xs text-slate-500 mb-4">
+            <h3 class="mb-1 font-black text-base group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{{ $exp->name }}</h3>
+            <p class="mb-1 text-sm text-slate-500 dark:text-slate-400">{{ $exp->architecture?->name }}</p>
+            <p class="mb-4 text-xs text-slate-400 dark:text-slate-500">
                 {{ strtoupper($exp->framework) }} ·
                 epochs: {{ $exp->hyperparameters['epochs'] ?? '?' }} ·
                 lr: {{ $exp->hyperparameters['learning_rate'] ?? '?' }}
@@ -75,26 +71,24 @@
 
             <div class="flex gap-2">
                 <a href="{{ route('training.show', $exp) }}"
-                   class="flex-1 text-center bg-slate-700 hover:bg-cyan-600/20 hover:border-cyan-500 border border-white/10 px-3 py-2 rounded-xl text-xs font-bold transition">
+                   class="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center text-xs font-bold text-slate-700 hover:border-cyan-400 hover:text-cyan-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-cyan-500/40 transition-colors">
                     عرض
                 </a>
                 <a href="{{ route('training.download', $exp) }}"
-                   class="text-center bg-slate-700 hover:bg-slate-600 border border-white/10 px-3 py-2 rounded-xl text-xs font-bold transition">
+                   class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600 hover:border-emerald-400 hover:text-emerald-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 transition-colors">
                     <i class="fa-solid fa-download"></i>
                 </a>
-                <form action="{{ route('training.destroy', $exp) }}" method="POST"
-                      onsubmit="return confirm('حذف التجربة؟')">
+                <form action="{{ route('training.destroy', $exp) }}" method="POST" onsubmit="return confirm('حذف التجربة؟')">
                     @csrf @method('DELETE')
-                    <button class="text-center bg-slate-700 hover:bg-red-600/20 hover:border-red-500 border border-white/10 px-3 py-2 rounded-xl text-xs font-bold transition">
-                        <i class="fa-solid fa-trash text-red-400"></i>
+                    <button class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-red-500 hover:border-red-400 hover:bg-red-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-red-500/10 transition-colors">
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </form>
             </div>
         </div>
         @endforeach
     </div>
-
-    <div class="mt-6">{{ $experiments->links() }}</div>
+    <div class="mt-8">{{ $experiments->links() }}</div>
     @endif
 </div>
 @endsection

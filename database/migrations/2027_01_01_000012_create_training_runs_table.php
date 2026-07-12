@@ -11,7 +11,7 @@ return new class extends Migration {
         Schema::create('training_runs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('training_experiment_id')->constrained()->cascadeOnDelete();
-            $table->enum('status', ['queued','running','completed','failed'])->default('queued');
+            $table->enum('status', ['queued', 'running', 'completed', 'failed'])->default('queued');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
             $table->longText('logs')->nullable();
@@ -20,5 +20,8 @@ return new class extends Migration {
         });
     }
 
-    public function down(): void { Schema::dropIfExists('training_runs'); }
+    public function down(): void
+    {
+        Schema::dropIfExists('training_runs');
+    }
 };

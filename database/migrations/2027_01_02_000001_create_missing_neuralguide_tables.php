@@ -5,8 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // ─── جدول الوسوم architecture_category ──────────────
@@ -116,7 +115,7 @@ return new class extends Migration
                 $table->longText('generated_code')->nullable();
                 $table->longText('custom_code')->nullable();
                 $table->text('notes')->nullable();
-                $table->enum('status', ['draft','queued','running','completed','failed'])->default('draft');
+                $table->enum('status', ['draft', 'queued', 'running', 'completed', 'failed'])->default('draft');
                 $table->json('result_metrics')->nullable();
                 $table->timestamps();
                 $table->index(['user_id', 'status']);
@@ -128,7 +127,7 @@ return new class extends Migration
             Schema::create('training_runs', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('training_experiment_id')->constrained()->cascadeOnDelete();
-                $table->enum('status', ['queued','running','completed','failed'])->default('queued');
+                $table->enum('status', ['queued', 'running', 'completed', 'failed'])->default('queued');
                 $table->timestamp('started_at')->nullable();
                 $table->timestamp('finished_at')->nullable();
                 $table->longText('logs')->nullable();

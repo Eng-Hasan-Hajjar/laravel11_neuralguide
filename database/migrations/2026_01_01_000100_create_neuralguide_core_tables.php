@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-     
+
         Schema::create('architectures', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -27,12 +27,14 @@ return new class extends Migration {
             $table->longText('pytorch_example')->nullable();
             $table->longText('tensorflow_example')->nullable();
             $table->boolean('is_published')->default(true);
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('architecture_category', function (Blueprint $table) {
             $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->primary(['architecture_id', 'category_id']);
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('suggestions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
@@ -40,7 +42,8 @@ return new class extends Migration {
             $table->string('detected_domain')->nullable();
             $table->string('input_language', 10)->default('ar');
             $table->json('metadata')->nullable();
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('architecture_suggestion', function (Blueprint $table) {
             $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
             $table->foreignId('suggestion_id')->constrained()->cascadeOnDelete();
@@ -48,12 +51,14 @@ return new class extends Migration {
             $table->unsignedTinyInteger('rank')->default(1);
             $table->text('reason')->nullable();
             $table->primary(['architecture_id', 'suggestion_id']);
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('favorites', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('architecture_id')->constrained()->cascadeOnDelete();
             $table->primary(['user_id', 'architecture_id']);
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('search_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
@@ -62,7 +67,8 @@ return new class extends Migration {
             $table->text('user_agent')->nullable();
             $table->unsignedInteger('results_count')->default(0);
             $table->json('metadata')->nullable();
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('research_notes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -70,7 +76,8 @@ return new class extends Migration {
             $table->string('title');
             $table->longText('body');
             $table->enum('visibility', ['private', 'public'])->default('private');
-            $table->timestamps(); });
+            $table->timestamps();
+        });
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -78,7 +85,8 @@ return new class extends Migration {
             $table->unsignedTinyInteger('rating')->default(5);
             $table->text('body')->nullable();
             $table->boolean('is_approved')->default(false);
-            $table->timestamps(); });
+            $table->timestamps();
+        });
     }
     public function down(): void
     {

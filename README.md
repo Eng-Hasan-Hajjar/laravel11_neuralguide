@@ -27,3 +27,30 @@ php artisan serve
 - واجهة Blade عربية RTL مع Tailwind عبر Vite.
 - نظام الترشيح Rule-based Expert System قابل للتبديل لاحقًا بخدمة LLM.
 - لا يتطلب Jetstream/Filament حتى يعمل فورًا؛ يمكن إضافتهما لاحقًا.
+
+
+
+
+
+
+
+
+
+
+# 1. إنشاء مشروع Laravel جديد 
+composer create-project laravel/laravel NeuralGuide "^12.0"  
+# 2. نسخ ملفات المشروع cd NeuralGuide 
+# 3. تثبيت التبعيات 
+composer install npm install  
+# 4. إعداد البيئة 
+cp .env.example .env php artisan key:generate  
+# 5. تهيئة قاعدة البيانات 
+php artisan migrate --seed  
+# 6. تجميع الأصول 
+npm run build   
+# إنتاج # أو: 
+npm run dev  
+  # 7. تشغيل الخادم 
+  php artisan serve 
+  # افتح: 
+  http://localhost:8000

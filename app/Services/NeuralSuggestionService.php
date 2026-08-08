@@ -94,6 +94,7 @@ class NeuralSuggestionService
             }
         }
 
+
         arsort($scores);
         $topNames = array_slice(array_keys($scores), 0, 5);
 
@@ -109,6 +110,7 @@ class NeuralSuggestionService
                 return $arch;
             });
 
+            
         return [
             'domain'        => $detectedDomain,
             'analysis'      => 'تم تحليل وصف المشكلة وربط الكلمات المفتاحية بأنسب معماريات الشبكات العصبية عبر نظام قواعد خبير. النتائج مرتبة حسب درجة الملاءمة.',

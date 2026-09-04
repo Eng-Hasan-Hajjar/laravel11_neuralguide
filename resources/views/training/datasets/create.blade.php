@@ -72,6 +72,23 @@
 
 @push('scripts')
 <script>
+let isSubmitting = false;
+
+document.querySelector('form').addEventListener('submit', function (e) {
+    if (isSubmitting) {
+        e.preventDefault();
+        return false;
+    }
+    isSubmitting = true;
+    
+    // تعطيل الزر وإظهار حالة التحميل
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalContent = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الرفع...';
+    submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+});
+
 document.getElementById('file-input').addEventListener('change', function () {
     const name = document.getElementById('file-name');
     if (this.files[0]) {
@@ -82,3 +99,7 @@ document.getElementById('file-input').addEventListener('change', function () {
 </script>
 @endpush
 @endsection
+
+
+
+

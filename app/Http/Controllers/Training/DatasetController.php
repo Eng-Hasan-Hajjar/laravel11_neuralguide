@@ -22,35 +22,46 @@ class DatasetController extends Controller
         return view('training.datasets.create');
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name'        => 'required|string|max:200',
-            'description' => 'nullable|string|max:1000',
-            'type'        => 'required|in:csv,images,json,custom',
-            'file'        => 'required|file|max:102400', // 100MB
-            'task_type'   => 'nullable|string|max:100',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'name'        => 'required|string|max:200',
+        'description' => 'nullable|string|max:1000',
+        'type'        => 'required|in:csv,images,json,custom',
+        'file'        => 'required|file|max:102400',
+        'task_type'   => 'nullable|string|max:100',
+    ]);
 
-        $file = $request->file('file');
-        $path = $file->store('datasets/' . auth()->id(), 'local');
+    // التحقق من عدم وجود ملف بنفس الاسم للمستخدم الحالي
+    $existingDataset = TrainingDataset::where('user_id', auth()->id())
+        ->where('file_name', $request->file('file')->getClientOriginalName())
+        ->where('created_at', '>=', now()->subMinutes(5)) // خلال آخر 5 دقائق
+        ->first();
 
-        $dataset = TrainingDataset::create([
-            'user_id'     => auth()->id(),
-            'name'        => $request->name,
-            'description' => $request->description,
-            'type'        => $request->type,
-            'task_type'   => $request->task_type,
-            'file_path'   => $path,
-            'file_size'   => $file->getSize(),
-            'file_name'   => $file->getClientOriginalName(),
-            'meta'        => [],
-        ]);
-
-        return redirect()->route('training.datasets.show', $dataset)
-            ->with('status', 'تم رفع مجموعة البيانات بنجاح');
+    if ($existingDataset) {
+        return redirect()->back()
+            ->withErrors(['file' => 'هذا الملف تم رفعه مسبقاً.'])
+            ->withInput();
     }
 
+    $file = $request->file('file');
+    $path = $file->store('datasets/' . auth()->id(), 'local');
+
+    $dataset = TrainingDataset::create([
+        'user_id'     => auth()->id(),
+        'name'        => $request->name,
+        'description' => $request->description,
+        'type'        => $request->type,
+        'task_type'   => $request->task_type,
+        'file_path'   => $path,
+        'file_size'   => $file->getSize(),
+        'file_name'   => $file->getClientOriginalName(),
+        'meta'        => [],
+    ]);
+
+    return redirect()->route('training.datasets.index')
+        ->with('status', 'تم رفع مجموعة البيانات بنجاح');
+}
     public function show(TrainingDataset $dataset)
     {
         $this->authorize('view', $dataset);
